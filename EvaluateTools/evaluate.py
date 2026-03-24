@@ -116,7 +116,10 @@ def evaluate(
 
     ckpt_path = os.path.join(save_dir, ckpt_name)
     ckpt = torch.load(ckpt_path, map_location=DEVICE)
-    model.load_state_dict(ckpt["model"])
+    model_state = ckpt.get("model_state", ckpt.get("model"))
+    if model_state is None:
+        raise KeyError(f"Checkpoint {ckpt_path} does not contain model weights")
+    model.load_state_dict(model_state)
 
     metrics, ans = run_eval(
         model, dev_dataset, dev_eval,
