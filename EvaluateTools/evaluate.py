@@ -52,6 +52,10 @@ def evaluate(
     dropout:        float = 0.1,
     dropout_char:   float = 0.05,
     pretrained_char: bool = False,
+    norm_name:      str   = "layer_norm",
+    norm_groups:    int   = 8,
+    activation:     str   = "relu",
+    init_name:      str   = "kaiming",
 ) -> dict:
     """Evaluate a saved QANet checkpoint on the SQuAD v1.1 dev set.
 
@@ -106,6 +110,10 @@ def evaluate(
         dropout=dropout,
         dropout_char=dropout_char,
         pretrained_char=pretrained_char,
+        norm_name=norm_name,
+        norm_groups=norm_groups,
+        activation=activation,
+        init_name=init_name,
     )
 
     word_mat, char_mat = load_word_char_mats(args)
@@ -115,7 +123,7 @@ def evaluate(
     dev_dataset = SQuADDataset(dev_npz)
 
     ckpt_path = os.path.join(save_dir, ckpt_name)
-    ckpt = torch.load(ckpt_path, map_location=DEVICE)
+    ckpt = torch.load(ckpt_path, map_location=DEVICE, weights_only=False)
     model_state = ckpt.get("model_state", ckpt.get("model"))
     if model_state is None:
         raise KeyError(f"Checkpoint {ckpt_path} does not contain model weights")
